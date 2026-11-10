@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La pizzería matemática</title>
+<style>
+:root{--red:#c94f32;--brown:#713b25;--cream:#fff8ed;--gold:#f5bd4d;--green:#39834c;--ink:#35251f}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:linear-gradient(135deg,#fff0d5,#ffdfc5);color:var(--ink);min-height:100vh}
+header{background:var(--red);color:white;text-align:center;padding:17px 12px;box-shadow:0 4px 0 #9f3b27}header h1{margin:0;font-size:clamp(1.55rem,4vw,2.35rem)}header p{margin:5px 0 0}
+main{max-width:940px;margin:22px auto;padding:0 14px 35px}.panel{background:#fffdf8;border:3px solid #efc58e;border-radius:23px;padding:clamp(17px,4vw,29px);box-shadow:0 8px 0 #e7c69d}
+.center{text-align:center}h2{color:var(--brown);margin:5px 0 12px}button{border:0;border-radius:14px;padding:13px 20px;font-size:1rem;font-weight:800;cursor:pointer;background:var(--red);color:white;box-shadow:0 4px 0 #92351f}button:focus-visible{outline:4px solid #2676b9;outline-offset:3px}button:disabled{cursor:default;opacity:.88}button.secondary{background:var(--gold);color:#563414;box-shadow:0 4px 0 #c48b2b}
+.hidden{display:none!important}.topline{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:800;color:#75432b;margin-bottom:15px}.progress{height:12px;background:#f1dfc8;border-radius:20px;overflow:hidden;margin:10px 0 20px}.progress span{display:block;height:100%;background:#55a565;width:0%;transition:width .3s}
+.customer{font-size:1.12rem;background:#fff1d9;border-radius:16px;padding:14px;margin:12px 0}.pizza{font-size:4rem;margin:5px}.equation{font-size:clamp(2rem,7vw,3.4rem);font-weight:900;color:#803b22;background:#fff0d6;border:2px dashed #e8b76e;border-radius:18px;padding:15px;margin:14px auto;max-width:420px}
+.options{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:18px 0}.option{background:#fff0d8;color:#5b321d;border:2px solid #edc28a;box-shadow:none;min-height:58px}.option.correct{background:#dff2df;border-color:#65a66c;color:#205d2a}.option.wrong{background:#ffe1dc;border-color:#d36b5b;color:#8b2d22}
+.feedback{min-height:54px;padding:12px;border-radius:14px;font-weight:700;margin:12px 0}.feedback.good{background:#e4f5e5;color:#205d2a}.feedback.bad{background:#fff0d9;color:#75431d}
+.small{font-size:.92rem;color:#73513f}.badge{display:inline-block;background:#e6f2e4;color:#275a2b;padding:5px 10px;border-radius:99px;font-size:.85rem;font-weight:800}.stars{font-size:1.5rem;letter-spacing:4px;color:#d99b20}
+.details{margin-top:22px;text-align:left;background:#fff7e9;border-radius:15px;padding:15px}.details h3{margin:0 0 8px;color:#713b25}.details p{margin:6px 0}.details ul{margin:8px 0;padding-left:21px}
+footer{text-align:center;color:#815b46;padding:0 12px 22px;font-size:.9rem}
+@media(max-width:500px){.options{grid-template-columns:1fr}}
+</style></head>
+<body>
+<header><h1>🍕 ¡La pizzería matemática!</h1><p>¡Resuelve sumas y restas para completar los pedidos!</p></header>
+<main>
+<section id="welcome" class="panel center">
+ <div class="pizza">👩‍🍳🍕👨‍🍳</div><span class="badge">Matemáticas · Fase 3 · 2.º de primaria</span>
+ <h2>¡Bienvenido, pequeño pizzero!</h2>
+ <p>La pizzería está llena de pedidos. Ayuda al equipo a contar las pizzas, sumar pedidos y descubrir cuántas quedan.</p>
+ <p><strong>Tu misión:</strong> resuelve 6 retos de suma y resta y gana estrellas.</p>
+ <p class="small">Lee cada situación, calcula y elige una respuesta. Después recibirás una explicación.</p>
+ <button onclick="startGame()">¡Comenzar!</button>
+ <div class="details">
+  <h3>¿Qué aprenderemos?</h3>
+  <p>Resolver situaciones cotidianas que implican agregar, juntar y quitar cantidades; practicar sumas y restas con números de hasta dos cifras.</p>
+ </div>
+</section>
+<section id="game" class="panel hidden">
+ <div class="topline"><span id="levelLabel">Reto 1 de 6</span><span id="scoreLabel">⭐ 0 estrellas</span></div>
+ <div class="progress"><span id="progressBar"></span></div>
+ <div class="center"><div class="pizza">🍕</div><h2 id="title"></h2><div id="story" class="customer"></div><div id="equation" class="equation"></div></div>
+ <div id="options" class="options"></div><div id="feedback" class="feedback" aria-live="polite">Selecciona la respuesta correcta.</div>
+ <div class="center"><button id="next" class="secondary hidden" onclick="nextQuestion()">Siguiente pedido ➜</button></div>
+</section>
+<section id="finish" class="panel center hidden">
+ <div class="pizza">🏆🍕</div><h2>¡Pedido completado!</h2><p>Terminaste todos los retos de la pizzería.</p>
+ <div id="finalStars" class="stars"></div><h3 id="finalScore"></h3><p id="finalText"></p>
+ <button onclick="restart()">Jugar otra vez</button>
+ <div class="details"><h3>Lo que practicamos</h3><p>Sumar para juntar o agregar cantidades y restar para quitar o saber cuántas quedan.</p></div>
+</section>
+</main>
+<footer>Recurso educativo digital interactivo · Saberes y Pensamiento Científico</footer>
+<script>
+const qs=[
+ {title:"Pedido 1 · ¡Más pizzas para la mesa!",story:"Llegaron 12 pizzas de queso y después llegaron 5 pizzas más. ¿Cuántas pizzas hay en total?",eq:"12 + 5 = ?",a:[15,17,18],right:17,ex:"¡Muy bien! Sumamos porque llegaron más pizzas: 12 + 5 = 17."},
+ {title:"Pedido 2 · Se entregaron algunas pizzas",story:"La pizzería tenía 18 pizzas listas. Un cliente se llevó 6. ¿Cuántas pizzas quedaron?",eq:"18 − 6 = ?",a:[11,12,13],right:12,ex:"¡Correcto! Restamos las 6 pizzas que se entregaron: 18 − 6 = 12."},
+ {title:"Pedido 3 · Dos pedidos juntos",story:"Una familia pidió 23 pizzas pequeñas para un evento y otra pidió 14. ¿Cuántas pizzas pidieron entre las dos familias?",eq:"23 + 14 = ?",a:[37,36,38],right:37,ex:"¡Excelente! Juntamos los dos pedidos: 23 + 14 = 37."},
+ {title:"Pedido 4 · ¿Cuántas faltan?",story:"Hay 30 cajas para entregar y ya se usaron 12. ¿Cuántas cajas quedan disponibles?",eq:"30 − 12 = ?",a:[18,19,17],right:18,ex:"¡Así es! Quitamos 12 a 30: quedan 18 cajas."},
+ {title:"Pedido 5 · Calcula mentalmente",story:"En la mañana se vendieron 26 pizzas y por la tarde 13 más. ¿Cuántas se vendieron en todo el día?",eq:"26 + 13 = ?",a:[38,39,40],right:39,ex:"¡Lo lograste! 26 + 10 = 36 y 36 + 3 = 39."},
+ {title:"Pedido 6 · El último reparto",story:"Se prepararon 40 pizzas y el repartidor ya entregó 17. ¿Cuántas pizzas faltan por entregar?",eq:"40 − 17 = ?",a:[23,24,22],right:23,ex:"¡Pedido resuelto! 40 − 10 = 30 y 30 − 7 = 23."}
+];
+let idx=0,score=0,done=false;
+function startGame(){idx=0;score=0;document.getElementById('welcome').classList.add('hidden');document.getElementById('finish').classList.add('hidden');document.getElementById('game').classList.remove('hidden');render();}
+function render(){done=false;let q=qs[idx];document.getElementById('levelLabel').textContent=`Reto ${idx+1} de ${qs.length}`;document.getElementById('scoreLabel').textContent=`⭐ ${score} ${score===1?'estrella':'estrellas'}`;document.getElementById('progressBar').style.width=`${idx/qs.length*100}%`;document.getElementById('title').textContent=q.title;document.getElementById('story').textContent=q.story;document.getElementById('equation').textContent=q.eq;document.getElementById('feedback').className='feedback';document.getElementById('feedback').textContent='Selecciona la respuesta correcta.';document.getElementById('next').classList.add('hidden');document.getElementById('options').innerHTML='';
+ q.a.forEach(n=>{let b=document.createElement('button');b.className='option';b.textContent=n;b.onclick=()=>answer(n,b);document.getElementById('options').appendChild(b);});}
+function answer(n,b){if(done)return;done=true;let q=qs[idx],ok=n===q.right;document.querySelectorAll('.option').forEach(x=>x.disabled=true);if(ok){score++;b.classList.add('correct');document.getElementById('feedback').className='feedback good';document.getElementById('feedback').textContent='🎉 ¡Respuesta correcta! '+q.ex;}else{b.classList.add('wrong');[...document.querySelectorAll('.option')].find(x=>Number(x.textContent)===q.right).classList.add('correct');document.getElementById('feedback').className='feedback bad';document.getElementById('feedback').textContent='¡Buen intento! La respuesta es '+q.right+'. '+q.ex;}
+ document.getElementById('scoreLabel').textContent=`⭐ ${score} ${score===1?'estrella':'estrellas'}`;document.getElementById('next').textContent=idx===qs.length-1?'Ver resultado 🏆':'Siguiente pedido ➜';document.getElementById('next').classList.remove('hidden');}
+function nextQuestion(){if(idx<qs.length-1){idx++;render();}else finish();}
+function finish(){document.getElementById('game').classList.add('hidden');document.getElementById('finish').classList.remove('hidden');document.getElementById('progressBar').style.width='100%';document.getElementById('finalStars').textContent='⭐'.repeat(score)+'☆'.repeat(qs.length-score);document.getElementById('finalScore').textContent=`Obtuviste ${score} de ${qs.length} estrellas.`;document.getElementById('finalText').textContent=score===6?'¡Excelente! Eres un maestro de las sumas y restas.':score>=4?'¡Muy bien! Sigue practicando tus estrategias de cálculo.':'¡Buen esfuerzo! Puedes volver a jugar y practicar un poco más.';}
+function restart(){document.getElementById('finish').classList.add('hidden');document.getElementById('welcome').classList.remove('hidden');}
+</script></body></html>
